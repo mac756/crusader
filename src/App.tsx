@@ -124,47 +124,47 @@ function App() {
       <div className={`min-h-screen flex flex-col ${darkMode ? 'bg-gray-900' : 'knight-bg'}`}>
         {/* Header */}
         <header className={`${darkMode ? 'bg-gray-800/95' : 'bg-crusader-800/95'} backdrop-blur-md border-b border-gold-500/20 sticky top-0 z-50 shield-border`}>
-          <div className="max-w-4xl mx-auto px-4 py-3 flex items-center gap-4">
-            {/* Logo */}
-            <div className="relative">
-              <CrusaderLogo className="w-11 h-11" />
-              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-gold-500 rounded-full border-2 border-crusader-800"></div>
+          <div className="max-w-4xl mx-auto px-2 sm:px-4 py-2 sm:py-3 flex items-center gap-2 sm:gap-4">
+            {/* Logo - larger and more prominent on desktop */}
+            <div className="relative flex-shrink-0">
+              <CrusaderLogo className="w-11 h-11 md:w-14 md:h-14 lg:w-16 lg:h-16 header-logo transition-all duration-300 hover:scale-110" />
+              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 md:w-4 md:h-4 bg-gold-500 rounded-full border-2 border-crusader-800 animate-pulse-slow"></div>
             </div>
             
             {/* Title */}
-            <div className="flex flex-col">
-              <h1 className="text-xl font-bold text-white tracking-tight">
+            <div className="flex flex-col min-w-0">
+              <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-white tracking-tight truncate">
                 <span className="gold-gradient-text">CRUSADER</span>
               </h1>
-              <p className="text-xs text-gold-300/80 font-medium tracking-widest uppercase">
+              <p className="text-xs md:text-sm lg:text-base text-gold-300/80 font-medium tracking-widest uppercase hidden md:block">
                 Christian AI Assistant
               </p>
             </div>
             
-            {/* Decorative cross */}
-            <div className="hidden sm:flex ml-2 opacity-30">
+            {/* Decorative cross - desktop only */}
+            <div className="hidden lg:flex ml-2 opacity-30">
               <svg viewBox="0 0 24 24" className="w-6 h-6 text-gold-500" fill="currentColor">
                 <rect x="10" y="3" width="4" height="18" rx="1" />
                 <rect x="4" y="9" width="16" height="4" rx="1" />
               </svg>
             </div>
             
-            <div className="ml-auto flex items-center gap-2">
+            <div className="ml-auto flex items-center gap-1 sm:gap-2">
               <button
                 onClick={toggleFullscreen}
-                className={`p-2.5 rounded-lg transition-all duration-200 ${darkMode ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-crusader-700 text-gold-300 hover:bg-crusader-600'}`}
+                className={`p-2 sm:p-2.5 rounded-lg transition-all duration-200 touch-target ${darkMode ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-crusader-700 text-gold-300 hover:bg-crusader-600'}`}
                 aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
                 title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
               >
-                {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
+                {isFullscreen ? <Minimize2 className="w-4 h-4 sm:w-5 sm:h-5" /> : <Maximize2 className="w-4 h-4 sm:w-5 sm:h-5" />}
               </button>
               <button
                 onClick={() => setDarkMode(!darkMode)}
-                className={`p-2.5 rounded-lg transition-all duration-200 ${darkMode ? 'bg-gray-700 text-yellow-400 hover:bg-gray-600' : 'bg-crusader-700 text-gold-300 hover:bg-crusader-600'}`}
+                className={`p-2 sm:p-2.5 rounded-lg transition-all duration-200 touch-target ${darkMode ? 'bg-gray-700 text-yellow-400 hover:bg-gray-600' : 'bg-crusader-700 text-gold-300 hover:bg-crusader-600'}`}
                 aria-label="Toggle dark mode"
                 title={darkMode ? 'Light Mode' : 'Dark Mode'}
               >
-                {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
+                {darkMode ? <Sun className="w-4 h-4 sm:w-5 sm:h-5" /> : <Moon className="w-4 h-4 sm:w-5 sm:h-5" />}
               </button>
             </div>
           </div>

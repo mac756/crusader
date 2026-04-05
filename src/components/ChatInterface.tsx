@@ -13,7 +13,7 @@ interface ChatInterfaceProps {
 
 type Mode = 'chat' | 'scripture' | 'debate' | 'devotional'
 
-const API_URL = 'http://localhost:3001'
+const API_URL = 'https://suppliers-arabic-cal-integer.trycloudflare.com'
 
 // Bible verses to display while thinking
 const THINKING_VERSES = [
@@ -43,6 +43,7 @@ export default function ChatInterface({ darkMode }: ChatInterfaceProps) {
   const [showThoughts, setShowThoughts] = useState(false)
   const [isSpeakingEspeak, setIsSpeakingEspeak] = useState(false)
   const [currentThinkingVerse, setCurrentThinkingVerse] = useState(THINKING_VERSES[0])
+  const [showMobileMenu, setShowMobileMenu] = useState(false)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
@@ -271,18 +272,39 @@ export default function ChatInterface({ darkMode }: ChatInterfaceProps) {
 
   const isThinking = isLoading || isAILoading
 
+  // Check if we have thoughts to show in desktop panel
+  const hasThoughts = messages.length > 0 && messages[messages.length - 1].role === 'assistant' && messages[messages.length - 1].thoughts
+
   return (
-    <div className={`flex flex-col h-[calc(100vh-180px)] rounded-2xl overflow-hidden shadow-2xl ${localDarkMode ? 'bg-gray-900' : 'bg-white'}`}>
+    <div className={`flex flex-col lg:flex-row h-chat-container rounded-2xl overflow-hidden shadow-2xl chat-container gap-0 ${localDarkMode ? 'bg-gray-900' : 'bg-white'}`}>
+      {/* Main Chat Area */}
+      <div className="flex-1 flex flex-col min-w-0">
       {/* Mode Tabs */}
-      <div className={`flex items-center justify-between px-4 py-3 border-b ${localDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-crusader-50 border-crusader-200'}`}>
-        <div className="flex items-center gap-2">
+      <div className={`flex items-center justify-between px-2 sm:px-4 py-2 sm:py-3 border-b ${localDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-crusader-50 border-crusader-200'}`}>
+        {/* Mobile Menu Button */}
+        <button
+          onClick={() => setShowMobileMenu(!showMobileMenu)}
+          className={`md:hidden p-2 rounded-lg touch-target transition-colors ${localDarkMode ? 'bg-gray-700 text-white' : 'bg-crusader-100 text-crusader-700'}`}
+          aria-label="Toggle menu"
+        >
+          <svg viewBox="0 0 24 24" className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2">
+            {showMobileMenu ? (
+              <path d="M6 18L18 6M6 6l12 12" />
+            ) : (
+              <path d="M4 6h16M4 12h16M4 18h16" />
+            )}
+          </svg>
+        </button>
+
+        {/* Mode Tabs - Desktop: inline, Mobile: dropdown */}
+        <div className={`md:flex md:items-center md:gap-2 ${showMobileMenu ? 'absolute z-50 top-full left-0 right-0 flex-col gap-2 p-4 shadow-lg rounded-b-xl border-t' : 'hidden'} ${localDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-crusader-50 border-crusader-200'} md:relative md:flex-row md:p-0 md:shadow-none md:border-0`}>
           {(Object.keys(modeConfig) as Mode[]).map((m) => {
             const Icon = modeConfig[m].icon
             return (
               <button
                 key={m}
-                onClick={() => setMode(m)}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
+                onClick={() => { setMode(m); setShowMobileMenu(false); }}
+                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all touch-target mode-button ${
                   mode === m
                     ? 'bg-crusader-700 text-white shadow-md'
                     : localDarkMode
@@ -296,7 +318,7 @@ export default function ChatInterface({ darkMode }: ChatInterfaceProps) {
             )
           })}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-1 sm:gap-2">
           {/* Thoughts Toggle */}
           <button
             onClick={() => setShowThoughts(!showThoughts)}
@@ -356,7 +378,7 @@ export default function ChatInterface({ darkMode }: ChatInterfaceProps) {
       </div>
 
       {/* Messages */}
-      <div className={`flex-1 overflow-y-auto p-4 space-y-4 message-container ${localDarkMode ? 'bg-gray-800' : 'bg-crusader-50/50'}`}>
+      <div className={`flex-1 overflow-y-auto p-3 sm:p-4 lg:p-6 space-y-4 message-container ${localDarkMode ? 'bg-gray-800' : 'bg-crusader-50/50'}`}>
         {connectionError && (
           <div className={`text-center py-3 px-4 rounded-lg text-sm ${localDarkMode ? 'bg-red-900/50 text-red-300' : 'bg-red-50 text-red-600'}`}>
             {connectionError}
@@ -441,11 +463,11 @@ export default function ChatInterface({ darkMode }: ChatInterfaceProps) {
               darkMode={localDarkMode} 
               onSpeak={message.role === 'user' ? undefined : handleSpeak}
             />
-            {/* Show thoughts panel for the last assistant message */}
+            {/* Show thoughts panel for the last assistant message - hidden on desktop lg+ */}
             {message.role === 'assistant' && index === messages.length - 1 && message.thoughts && (
-              <div className="mt-2">
-                <ThoughtsPanel 
-                  darkMode={localDarkMode} 
+              <div className="mt-2 lg:hidden">
+                <ThoughtsPanel
+                  darkMode={localDarkMode}
                   isVisible={showThoughts}
                   onToggle={() => setShowThoughts(!showThoughts)}
                   thoughts={message.thoughts}
@@ -509,24 +531,24 @@ export default function ChatInterface({ darkMode }: ChatInterfaceProps) {
 
       {/* Input */}
       {mode !== 'devotional' && (
-        <div className={`p-4 border-t ${localDarkMode ? 'bg-gray-900 border-gray-700' : 'bg-white border-crusader-200'}`}>
-          <div className={`flex items-end gap-3 p-3 rounded-2xl ${localDarkMode ? 'bg-gray-800 border border-gray-700' : 'bg-crusader-50 border border-crusader-200'}`}>
+        <div className={`p-3 sm:p-4 border-t ${localDarkMode ? 'bg-gray-900 border-gray-700' : 'bg-white border-crusader-200'}`}>
+          <div className={`flex items-end gap-2 sm:gap-3 p-3 sm:p-4 lg:p-5 rounded-2xl ${localDarkMode ? 'bg-gray-800 border border-gray-700' : 'bg-crusader-50 border border-crusader-200'}`}>
             <textarea
               ref={inputRef}
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={handleKeyDown}
               placeholder={`Ask Crusader about ${mode === 'scripture' ? 'scripture' : mode === 'debate' ? 'theology and debate' : 'Christianity'}...`}
-              className={`flex-1 resize-none bg-transparent border-none outline-none text-base ${localDarkMode ? 'text-white placeholder-gray-500' : 'text-crusader-900 placeholder-crusader-400'}`}
+              className={`flex-1 resize-none bg-transparent border-none outline-none text-base sm:text-lg lg:text-xl input-area ${localDarkMode ? 'text-white placeholder-gray-500' : 'text-crusader-900 placeholder-crusader-400'}`}
               rows={1}
               disabled={isLoading || isAILoading}
             />
-            
+
             {/* Voice Input Button */}
             <button
               onClick={isRecording ? stopRecording : startRecording}
               disabled={isLoading || isAILoading}
-              className={`p-3 rounded-full transition-all ${
+              className={`p-3 sm:p-4 lg:p-4 rounded-full transition-all touch-target ${
                 isRecording
                   ? 'bg-red-500 text-white animate-pulse'
                   : localDarkMode
@@ -536,13 +558,13 @@ export default function ChatInterface({ darkMode }: ChatInterfaceProps) {
               aria-label={isRecording ? 'Stop recording' : 'Start voice input'}
               title={isRecording ? 'Stop recording' : 'Voice input'}
             >
-              {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
+              {isRecording ? <MicOff className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7" /> : <Mic className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7" />}
             </button>
-            
+
             <button
               onClick={handleSend}
               disabled={!input.trim() || isLoading || isAILoading}
-              className={`p-3 rounded-full transition-all ${
+              className={`p-3 sm:p-4 lg:p-5 rounded-full transition-all touch-target ${
                 input.trim() && !isLoading && !isAILoading
                   ? 'bg-gradient-to-r from-crusader-600 to-crusader-700 text-white shadow-lg hover:shadow-xl hover:scale-105'
                   : localDarkMode
@@ -551,12 +573,30 @@ export default function ChatInterface({ darkMode }: ChatInterfaceProps) {
               }`}
               aria-label="Send message"
             >
-              <Send className="w-5 h-5" />
+              <Send className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7" />
             </button>
           </div>
-          <p className={`text-xs text-center mt-2 ${localDarkMode ? 'text-gray-500' : 'text-crusader-400'}`}>
+          <p className={`text-xs sm:text-sm lg:text-base text-center mt-2 ${localDarkMode ? 'text-gray-500' : 'text-crusader-400'}`}>
             {isRecording ? 'Recording... Click mic to stop' : 'Press Enter to send • Click mic for voice • God bless!'}
           </p>
+        </div>
+      )}
+      </div>
+
+      {/* Desktop Thoughts Panel - Side by Side on lg+ */}
+      {hasThoughts && (
+        <div className="hidden lg:flex lg:w-96 xl:w-[420px] flex-col border-l border-gray-700 bg-gray-900">
+          <div className="p-4 border-b border-gray-700">
+            <h3 className="text-gold-400 font-semibold flex items-center gap-2">
+              <Brain className="w-5 h-5" />
+              AI Thoughts
+            </h3>
+          </div>
+          <div className="flex-1 overflow-y-auto p-4">
+            <div className="text-sm text-gray-300">
+              <pre className="whitespace-pre-wrap font-sans leading-relaxed">{messages[messages.length - 1].thoughts}</pre>
+            </div>
+          </div>
         </div>
       )}
     </div>

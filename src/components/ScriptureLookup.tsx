@@ -12,7 +12,7 @@ interface Book {
   testament: 'old' | 'new'
 }
 
-const API_URL = 'http://localhost:3001'
+const API_URL = 'https://suppliers-arabic-cal-integer.trycloudflare.com'
 
 export default function ScriptureLookup({ onSelect, darkMode }: ScriptureLookupProps) {
   const [books, setBooks] = useState<Book[]>([])

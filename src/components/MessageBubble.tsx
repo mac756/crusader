@@ -29,10 +29,10 @@ export default function MessageBubble({ message, darkMode, onSpeak }: MessageBub
       </div>
       
       {/* Message Content */}
-      <div className={`max-w-[75%] px-5 py-4 rounded-2xl shadow-md ${
-        isUser 
-          ? 'bg-gradient-to-r from-gold-500 to-gold-600 text-white rounded-tr-sm' 
-          : darkMode 
+      <div className={`max-w-[85%] sm:max-w-[75%] lg:max-w-[70%] px-4 sm:px-5 py-3 sm:py-4 rounded-2xl shadow-md ${
+        isUser
+          ? 'bg-gradient-to-r from-gold-500 to-gold-600 text-white rounded-tr-sm'
+          : darkMode
             ? 'bg-gray-700/90 text-white rounded-tl-sm border border-gray-600'
             : 'bg-white text-gray-800 rounded-tl-sm border border-crusader-100'
       }`}>

@@ -57,8 +57,9 @@ body {
 
 /* Scripture text styling */
 .scripture-text {
-  @apply font-serif italic leading-relaxed;
   font-family: 'Merriweather', Georgia, serif;
+  font-style: italic;
+  line-height: 1.8;
 }
 
 /* Knight Shield Background Pattern */
@@ -188,16 +189,16 @@ body {
 
 /* Button hover effects */
 .btn-crusader {
-  @apply transition-all duration-200 ease-out;
+  transition: all 0.2s ease-out;
 }
 
 .btn-crusader:hover {
-  @apply transform scale-105;
+  transform: scale(1.05);
   box-shadow: 0 4px 20px rgba(153, 27, 27, 0.4);
 }
 
 .btn-crusader:active {
-  @apply transform scale-95;
+  transform: scale(0.95);
 }
 
 /* Message container styling */
@@ -224,8 +225,100 @@ input:focus-visible {
 }
 
 /* Responsive typography */
+@media (max-width: 768px) {
+  html {
+    font-size: 13px;
+  }
+}
+
 @media (max-width: 640px) {
   html {
-    font-size: 14px;
+    font-size: 12px;
+  }
+}
+
+/* Desktop-specific overrides (>768px) */
+@media (min-width: 769px) {
+  .chat-container {
+    height: calc(100vh - 180px);
+  }
+  
+  .message-bubble {
+    max-width: 70%;
+  }
+  
+  .desktop-panel {
+    display: flex !important;
+  }
+}
+
+/* Mobile-specific overrides (<768px) */
+@media (max-width: 768px) {
+  .chat-container {
+    height: calc(100vh - 160px);
+  }
+  
+  .message-bubble {
+    max-width: 85%;
+  }
+  
+  .mobile-full-width {
+    width: 100% !important;
+  }
+  
+  .mobile-padding {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+  
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  .hamburger-nav {
+    display: flex !important;
+  }
+  
+  .desktop-only {
+    display: none !important;
+  }
+  
+  .header-logo {
+    width: 36px !important;
+    height: 36px !important;
+  }
+  
+  .input-area {
+    font-size: 16px !important; /* Prevent iOS zoom */
+  }
+}
+
+/* Very small screens */
+@media (max-width: 380px) {
+  .message-bubble {
+    max-width: 92%;
+  }
+  
+  .mode-button span {
+    display: none;
+  }
+}
+
+/* Ensure proper touch targets on mobile */
+@media (pointer: coarse) {
+  button, 
+  [role="button"],
+  input,
+  textarea,
+  select {
+    min-height: 44px;
+  }
+}
+
+/* Print styles */
+@media print {
+  .no-print {
+    display: none !important;
   }
 }

@@ -18,7 +18,7 @@ export default function DailyDevotional({ darkMode, onSpeak }: DailyDevotionalPr
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
-  const API_URL = 'http://localhost:3001'
+  const API_URL = 'https://suppliers-arabic-cal-integer.trycloudflare.com'
 
   const fetchDevotional = async () => {
     setIsLoading(true)
