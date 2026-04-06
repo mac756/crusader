@@ -1,7 +1,6 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
-import { Moon, Sun, Maximize2, Minimize2 } from 'lucide-react'
 import ChatInterface from './components/ChatInterface'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -12,187 +11,60 @@ const queryClient = new QueryClient({
   },
 })
 
-// Sword and Shield Logo with Christ Cross
-function CrusaderLogo({ className = "w-12 h-12" }: { className?: string }) {
+// Simple Cross Logo
+function CrossLogo({ className = "w-10 h-10" }: { className?: string }) {
   return (
     <svg 
-      viewBox="0 0 64 64" 
+      viewBox="0 0 40 40" 
       fill="none" 
       xmlns="http://www.w3.org/2000/svg"
       className={className}
     >
-      {/* Shield */}
-      <path 
-        d="M32 4L8 14V32C8 46 32 60 32 60C32 60 56 46 56 32V14L32 4Z" 
-        fill="url(#shieldGradient)"
-        stroke="url(#shieldStroke)"
-        strokeWidth="2"
-      />
-      
-      {/* Shield Inner Border */}
-      <path 
-        d="M32 8L12 16V32C12 44 32 56 32 56C32 56 52 44 52 32V16L32 8Z" 
-        fill="none"
-        stroke="rgba(212, 175, 55, 0.5)"
-        strokeWidth="1"
-      />
-      
-      {/* Cross (Christ Symbol) */}
-      <rect x="28" y="18" width="8" height="28" rx="1" fill="#d4af37"/>
-      <rect x="20" y="26" width="24" height="8" rx="1" fill="#d4af37"/>
-      
-      {/* Cross Highlight */}
-      <rect x="29" y="19" width="2" height="12" rx="0.5" fill="rgba(255,255,255,0.3)"/>
-      <rect x="21" y="27" width="10" height="2" rx="0.5" fill="rgba(255,255,255,0.3)"/>
-      
-      {/* Sword on the side */}
-      <path 
-        d="M48 8L54 14L52 16L46 10L48 8Z" 
-        fill="url(#swordGradient)"
-      />
-      <rect 
-        x="50" 
-        y="14" 
-        width="3" 
-        height="20" 
-        rx="0.5" 
-        transform="rotate(45 50 14)"
-        fill="url(#swordBlade)"
-      />
-      <rect 
-        x="48" 
-        y="28" 
-        width="7" 
-        height="3" 
-        rx="0.5"
-        transform="rotate(45 48 28)"
-        fill="#8b7355"
-      />
-      
-      {/* Gradients */}
-      <defs>
-        <linearGradient id="shieldGradient" x1="32" y1="4" x2="32" y2="60" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#7f1d1d"/>
-          <stop offset="50%" stopColor="#991b1b"/>
-          <stop offset="100%" stopColor="#450a0a"/>
-        </linearGradient>
-        <linearGradient id="shieldStroke" x1="32" y1="4" x2="32" y2="60" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#d4af37"/>
-          <stop offset="100%" stopColor="#b8860b"/>
-        </linearGradient>
-        <linearGradient id="swordGradient" x1="48" y1="8" x2="54" y2="14" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#d4af37"/>
-          <stop offset="100%" stopColor="#b8860b"/>
-        </linearGradient>
-        <linearGradient id="swordBlade" x1="51.5" y1="14" x2="51.5" y2="34" gradientUnits="userSpaceOnUse">
-          <stop offset="0%" stopColor="#e5e5e5"/>
-          <stop offset="50%" stopColor="#ffffff"/>
-          <stop offset="100%" stopColor="#c0c0c0"/>
-        </linearGradient>
-      </defs>
+      <rect x="17" y="6" width="6" height="28" rx="1" fill="#991b1b"/>
+      <rect x="10" y="14" width="20" height="6" rx="1" fill="#991b1b"/>
     </svg>
   )
 }
 
 function App() {
   const [darkMode, setDarkMode] = useState(false)
-  const [isFullscreen, setIsFullscreen] = useState(false)
-
-  // Listen for fullscreen changes
-  useEffect(() => {
-    const handleFullscreenChange = () => {
-      setIsFullscreen(!!document.fullscreenElement)
-    }
-    document.addEventListener('fullscreenchange', handleFullscreenChange)
-    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange)
-  }, [])
-
-  const toggleFullscreen = async () => {
-    try {
-      if (!document.fullscreenElement) {
-        await document.documentElement.requestFullscreen()
-      } else {
-        await document.exitFullscreen()
-      }
-    } catch (err) {
-      console.error('Fullscreen error:', err)
-    }
-  }
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className={`min-h-screen flex flex-col ${darkMode ? 'bg-gray-900' : 'knight-bg'}`}>
-        {/* Header */}
-        <header className={`${darkMode ? 'bg-gray-800/95' : 'bg-crusader-800/95'} backdrop-blur-md border-b border-gold-500/20 sticky top-0 z-50 shield-border`}>
-          <div className="max-w-4xl mx-auto px-2 sm:px-4 py-2 sm:py-3 flex items-center gap-2 sm:gap-4">
-            {/* Logo - larger and more prominent on desktop */}
-            <div className="relative flex-shrink-0">
-              <CrusaderLogo className="w-11 h-11 md:w-14 md:h-14 lg:w-16 lg:h-16 header-logo transition-all duration-300 hover:scale-110" />
-              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 md:w-4 md:h-4 bg-gold-500 rounded-full border-2 border-crusader-800 animate-pulse-slow"></div>
-            </div>
-            
-            {/* Title */}
-            <div className="flex flex-col min-w-0">
-              <h1 className="text-xl md:text-2xl lg:text-3xl font-bold text-white tracking-tight truncate">
-                <span className="gold-gradient-text">CRUSADER</span>
+      <div className={`min-h-screen flex flex-col ${darkMode ? 'bg-gray-900' : 'bg-white'}`}>
+        {/* Compact Header */}
+        <header className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-white border-b border-gray-200'} px-4 py-3`}>
+          <div className="max-w-4xl mx-auto flex items-center gap-3">
+            <CrossLogo />
+            <div>
+              <h1 className={`text-lg font-bold ${darkMode ? 'text-white' : 'text-gray-900'}`}>
+                <span className={darkMode ? 'text-red-400' : 'text-red-600'}>CRUSADER</span>
               </h1>
-              <p className="text-xs md:text-sm lg:text-base text-gold-300/80 font-medium tracking-widest uppercase hidden md:block">
-                Christian AI Assistant
-              </p>
             </div>
-            
-            {/* Decorative cross - desktop only */}
-            <div className="hidden lg:flex ml-2 opacity-30">
-              <svg viewBox="0 0 24 24" className="w-6 h-6 text-gold-500" fill="currentColor">
-                <rect x="10" y="3" width="4" height="18" rx="1" />
-                <rect x="4" y="9" width="16" height="4" rx="1" />
-              </svg>
-            </div>
-            
-            <div className="ml-auto flex items-center gap-1 sm:gap-2">
-              <button
-                onClick={toggleFullscreen}
-                className={`p-2 sm:p-2.5 rounded-lg transition-all duration-200 touch-target ${darkMode ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-crusader-700 text-gold-300 hover:bg-crusader-600'}`}
-                aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
-                title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
-              >
-                {isFullscreen ? <Minimize2 className="w-4 h-4 sm:w-5 sm:h-5" /> : <Maximize2 className="w-4 h-4 sm:w-5 sm:h-5" />}
-              </button>
+            <div className="ml-auto flex items-center gap-2">
               <button
                 onClick={() => setDarkMode(!darkMode)}
-                className={`p-2 sm:p-2.5 rounded-lg transition-all duration-200 touch-target ${darkMode ? 'bg-gray-700 text-yellow-400 hover:bg-gray-600' : 'bg-crusader-700 text-gold-300 hover:bg-crusader-600'}`}
-                aria-label="Toggle dark mode"
-                title={darkMode ? 'Light Mode' : 'Dark Mode'}
+                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
+                  darkMode 
+                    ? 'bg-gray-700 text-yellow-400 hover:bg-gray-600' 
+                    : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                }`}
               >
-                {darkMode ? <Sun className="w-4 h-4 sm:w-5 sm:h-5" /> : <Moon className="w-4 h-4 sm:w-5 sm:h-5" />}
+                {darkMode ? '☀️ Light' : '🌙 Dark'}
               </button>
             </div>
           </div>
         </header>
 
-        {/* Main Content */}
-        <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-6">
+        {/* Main Content - Fits on one screen */}
+        <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-4">
           <ChatInterface darkMode={darkMode} />
         </main>
 
-        {/* Footer */}
-        <footer className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-crusader-900/80 border-gold-500/10'} border-t py-4`}>
-          <div className="max-w-4xl mx-auto px-4">
-            <p className="text-center text-sm text-gold-300/70">
-              <span className="inline-flex items-center gap-2">
-                <svg viewBox="0 0 24 24" className="w-4 h-4 text-gold-500/50" fill="currentColor">
-                  <rect x="10" y="2" width="4" height="20" rx="1" />
-                  <rect x="3" y="9" width="18" height="4" rx="1" />
-                </svg>
-                Built for His glory
-                <svg viewBox="0 0 24 24" className="w-4 h-4 text-gold-500/50" fill="currentColor">
-                  <rect x="10" y="2" width="4" height="20" rx="1" />
-                  <rect x="3" y="9" width="18" height="4" rx="1" />
-                </svg>
-              </span>
-              <span className="mx-3 text-gold-500/30">|</span>
-              God bless!
-            </p>
+        {/* Simple Footer */}
+        <footer className={`${darkMode ? 'bg-gray-800 border-gray-700 text-gray-400' : 'bg-white border-t border-gray-200 text-gray-500'} py-3`}>
+          <div className="max-w-4xl mx-auto px-4 text-center text-sm">
+            Built for His glory • God bless!
           </div>
         </footer>
       </div>

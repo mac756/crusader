@@ -1,31 +1,19 @@
-@import url('https://fonts.googleapis.com/css2?family=Cinzova:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --color-crusader-red: #991b1b;
-  --color-gold: #d4af37;
-  --color-gold-dark: #b8860b;
-  --color-white: #ffffff;
-}
-
 * {
   box-sizing: border-box;
 }
 
-html {
-  scroll-behavior: smooth;
-}
-
-body {
+html, body {
   margin: 0;
   padding: 0;
   min-height: 100vh;
   font-family: 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
 }
 
 #root {
@@ -34,53 +22,39 @@ body {
   flex-direction: column;
 }
 
-/* Custom scrollbar for knight theme */
+/* Custom scrollbar */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(153, 27, 27, 0.1);
-  border-radius: 5px;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #991b1b 0%, #7f1d1d 100%);
-  border-radius: 5px;
-  border: 2px solid rgba(212, 175, 55, 0.3);
+  background: #d1d5db;
+  border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: linear-gradient(180deg, #b91c1c 0%, #991b1b 100%);
+  background: #9ca3af;
 }
 
 /* Scripture text styling */
 .scripture-text {
   font-family: 'Merriweather', Georgia, serif;
   font-style: italic;
-  line-height: 1.8;
+  line-height: 1.7;
 }
 
-/* Knight Shield Background Pattern */
-.knight-bg {
-  background-color: #991b1b;
-  background-image: 
-    radial-gradient(ellipse at top, rgba(127, 29, 29, 0.8) 0%, transparent 50%),
-    radial-gradient(ellipse at bottom, rgba(69, 10, 10, 0.9) 0%, transparent 50%),
-    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d4af37' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+/* White theme background */
+.white-bg {
+  background-color: #ffffff;
 }
 
-/* Gold text gradient */
-.gold-gradient-text {
-  background: linear-gradient(135deg, #fcd34d 0%, #d4af37 50%, #b8860b 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Message bubble animations */
-@keyframes fadeIn {
+/* Thinking banner animation */
+@keyframes slideUp {
   from {
     opacity: 0;
     transform: translateY(10px);
@@ -91,75 +65,16 @@ body {
   }
 }
 
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
-}
-
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
-}
-
-.animate-fadeIn {
-  animation: fadeIn 0.4s ease-out forwards;
-}
-
 .animate-slideUp {
-  animation: slideUp 0.5s ease-out forwards;
-}
-
-.animate-pulse-slow {
-  animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-/* Thinking banner animation */
-.thinking-banner {
-  animation: slideUp 0.4s ease-out forwards;
-  background: linear-gradient(135deg, rgba(153, 27, 27, 0.95) 0%, rgba(127, 29, 29, 0.95) 100%);
-  border: 1px solid rgba(212, 175, 55, 0.3);
-}
-
-/* Bible verse card styling */
-.bible-verse-card {
-  background: linear-gradient(135deg, rgba(212, 175, 55, 0.15) 0%, rgba(184, 134, 11, 0.1) 100%);
-  border: 1px solid rgba(212, 175, 55, 0.3);
-  font-family: 'Merriweather', Georgia, serif;
-}
-
-/* Glassmorphism for panels */
-.glass-panel {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-/* Cross icon glow effect */
-.cross-glow {
-  filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.6));
+  animation: slideUp 0.3s ease-out forwards;
 }
 
 /* Typing indicator dots */
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; }
+  50% { opacity: 1; }
+}
+
 .typing-dot {
   animation: pulse 1.4s infinite ease-in-out;
 }
@@ -172,153 +87,33 @@ body {
   animation-delay: 0.4s;
 }
 
-/* Shield border decoration */
-.shield-border {
-  position: relative;
+/* Chat container height */
+.chat-container {
+  height: calc(100vh - 180px);
+  max-height: 700px;
 }
 
-.shield-border::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, transparent 0%, #d4af37 50%, transparent 100%);
+@media (max-width: 768px) {
+  .chat-container {
+    height: calc(100vh - 140px);
+  }
 }
 
-/* Button hover effects */
-.btn-crusader {
-  transition: all 0.2s ease-out;
+/* Message bubbles */
+.message-bubble {
+  max-width: 80%;
 }
 
-.btn-crusader:hover {
-  transform: scale(1.05);
-  box-shadow: 0 4px 20px rgba(153, 27, 27, 0.4);
-}
-
-.btn-crusader:active {
-  transform: scale(0.95);
-}
-
-/* Message container styling */
-.message-container {
-  scroll-behavior: smooth;
-}
-
-.message-container::-webkit-scrollbar {
-  width: 6px;
-}
-
-/* Focus styles for accessibility */
+/* Focus styles */
 button:focus-visible,
 textarea:focus-visible,
 input:focus-visible {
-  outline: 2px solid #d4af37;
+  outline: 2px solid #991b1b;
   outline-offset: 2px;
 }
 
 /* Selection styling */
 ::selection {
-  background-color: rgba(212, 175, 55, 0.3);
+  background-color: rgba(153, 27, 27, 0.2);
   color: inherit;
-}
-
-/* Responsive typography */
-@media (max-width: 768px) {
-  html {
-    font-size: 13px;
-  }
-}
-
-@media (max-width: 640px) {
-  html {
-    font-size: 12px;
-  }
-}
-
-/* Desktop-specific overrides (>768px) */
-@media (min-width: 769px) {
-  .chat-container {
-    height: calc(100vh - 180px);
-  }
-  
-  .message-bubble {
-    max-width: 70%;
-  }
-  
-  .desktop-panel {
-    display: flex !important;
-  }
-}
-
-/* Mobile-specific overrides (<768px) */
-@media (max-width: 768px) {
-  .chat-container {
-    height: calc(100vh - 160px);
-  }
-  
-  .message-bubble {
-    max-width: 85%;
-  }
-  
-  .mobile-full-width {
-    width: 100% !important;
-  }
-  
-  .mobile-padding {
-    padding-left: 0.75rem !important;
-    padding-right: 0.75rem !important;
-  }
-  
-  .touch-target {
-    min-height: 44px;
-    min-width: 44px;
-  }
-  
-  .hamburger-nav {
-    display: flex !important;
-  }
-  
-  .desktop-only {
-    display: none !important;
-  }
-  
-  .header-logo {
-    width: 36px !important;
-    height: 36px !important;
-  }
-  
-  .input-area {
-    font-size: 16px !important; /* Prevent iOS zoom */
-  }
-}
-
-/* Very small screens */
-@media (max-width: 380px) {
-  .message-bubble {
-    max-width: 92%;
-  }
-  
-  .mode-button span {
-    display: none;
-  }
-}
-
-/* Ensure proper touch targets on mobile */
-@media (pointer: coarse) {
-  button, 
-  [role="button"],
-  input,
-  textarea,
-  select {
-    min-height: 44px;
-  }
-}
-
-/* Print styles */
-@media print {
-  .no-print {
-    display: none !important;
-  }
 }
