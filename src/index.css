@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Cinzova:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -8,7 +8,6 @@
   --color-crusader-red: #991b1b;
   --color-gold: #d4af37;
   --color-gold-dark: #b8860b;
-  --color-white: #ffffff;
 }
 
 * {
@@ -26,97 +25,84 @@ body {
   font-family: 'Inter', system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-color: #0a0a0a;
 }
 
 #root {
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
 }
 
-/* Custom scrollbar for knight theme */
+/* Crusader dark red/black background */
+.crusader-bg {
+  background: 
+    radial-gradient(ellipse at top, rgba(153, 27, 27, 0.15) 0%, transparent 50%),
+    radial-gradient(ellipse at bottom, rgba(69, 10, 10, 0.2) 0%, transparent 50%),
+    linear-gradient(180deg, #0f0f0f 0%, #1a1a1a 50%, #0a0a0a 100%);
+  background-color: #0a0a0a;
+}
+
+/* Gold gradient text */
+.gold-gradient-text {
+  background: linear-gradient(135deg, #fcd34d 0%, #d4af37 50%, #b8860b 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.4));
+}
+
+/* Custom scrollbar - dark theme */
 ::-webkit-scrollbar {
-  width: 10px;
-  height: 10px;
+  width: 8px;
+  height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(153, 27, 27, 0.1);
-  border-radius: 5px;
+  background: rgba(20, 20, 20, 0.5);
+  border-radius: 4px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: linear-gradient(180deg, #991b1b 0%, #7f1d1d 100%);
-  border-radius: 5px;
-  border: 2px solid rgba(212, 175, 55, 0.3);
+  background: linear-gradient(180deg, #991b1b 0%, #450a0a 100%);
+  border-radius: 4px;
+  border: 1px solid rgba(212, 175, 55, 0.2);
 }
 
 ::-webkit-scrollbar-thumb:hover {
   background: linear-gradient(180deg, #b91c1c 0%, #991b1b 100%);
 }
 
+/* Chat area only scrolls */
+.scrollable-chat {
+  scrollbar-width: thin;
+  scrollbar-color: #991b1b #0f0f0f;
+}
+
 /* Scripture text styling */
 .scripture-text {
-  @apply font-serif italic leading-relaxed;
   font-family: 'Merriweather', Georgia, serif;
+  font-style: italic;
+  line-height: 1.7;
 }
 
-/* Knight Shield Background Pattern */
-.knight-bg {
-  background-color: #991b1b;
-  background-image: 
-    radial-gradient(ellipse at top, rgba(127, 29, 29, 0.8) 0%, transparent 50%),
-    radial-gradient(ellipse at bottom, rgba(69, 10, 10, 0.9) 0%, transparent 50%),
-    url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23d4af37' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-}
-
-/* Gold text gradient */
-.gold-gradient-text {
-  background: linear-gradient(135deg, #fcd34d 0%, #d4af37 50%, #b8860b 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-/* Message bubble animations */
+/* Animations */
 @keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.5;
-  }
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.5; }
 }
 
-@keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
+@keyframes glow {
+  0% { box-shadow: 0 0 5px rgba(212, 175, 55, 0.3), 0 0 10px rgba(212, 175, 55, 0.2); }
+  100% { box-shadow: 0 0 15px rgba(212, 175, 55, 0.5), 0 0 30px rgba(212, 175, 55, 0.3); }
 }
 
 .animate-fadeIn {
@@ -127,35 +113,18 @@ body {
   animation: slideUp 0.5s ease-out forwards;
 }
 
-.animate-pulse-slow {
-  animation: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-/* Thinking banner animation */
+/* Thinking banner with gold glow */
 .thinking-banner {
-  animation: slideUp 0.4s ease-out forwards;
   background: linear-gradient(135deg, rgba(153, 27, 27, 0.95) 0%, rgba(127, 29, 29, 0.95) 100%);
   border: 1px solid rgba(212, 175, 55, 0.3);
+  box-shadow: 0 0 20px rgba(212, 175, 55, 0.15);
 }
 
-/* Bible verse card styling */
+/* Bible verse card with gold styling */
 .bible-verse-card {
-  background: linear-gradient(135deg, rgba(212, 175, 55, 0.15) 0%, rgba(184, 134, 11, 0.1) 100%);
-  border: 1px solid rgba(212, 175, 55, 0.3);
-  font-family: 'Merriweather', Georgia, serif;
-}
-
-/* Glassmorphism for panels */
-.glass-panel {
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  -webkit-backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-}
-
-/* Cross icon glow effect */
-.cross-glow {
-  filter: drop-shadow(0 0 8px rgba(212, 175, 55, 0.6));
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.12) 0%, rgba(184, 134, 11, 0.08) 100%);
+  border: 1px solid rgba(212, 175, 55, 0.25);
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.1);
 }
 
 /* Typing indicator dots */
@@ -169,44 +138,6 @@ body {
 
 .typing-dot:nth-child(3) {
   animation-delay: 0.4s;
-}
-
-/* Shield border decoration */
-.shield-border {
-  position: relative;
-}
-
-.shield-border::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 3px;
-  background: linear-gradient(90deg, transparent 0%, #d4af37 50%, transparent 100%);
-}
-
-/* Button hover effects */
-.btn-crusader {
-  @apply transition-all duration-200 ease-out;
-}
-
-.btn-crusader:hover {
-  @apply transform scale-105;
-  box-shadow: 0 4px 20px rgba(153, 27, 27, 0.4);
-}
-
-.btn-crusader:active {
-  @apply transform scale-95;
-}
-
-/* Message container styling */
-.message-container {
-  scroll-behavior: smooth;
-}
-
-.message-container::-webkit-scrollbar {
-  width: 6px;
 }
 
 /* Focus styles for accessibility */
@@ -223,9 +154,52 @@ input:focus-visible {
   color: inherit;
 }
 
-/* Responsive typography */
+/* Gold glow on buttons */
+.btn-glow {
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.3);
+  transition: box-shadow 0.3s ease;
+}
+
+.btn-glow:hover {
+  box-shadow: 0 0 25px rgba(212, 175, 55, 0.5);
+}
+
+/* Glass panel effect */
+.glass-panel {
+  background: rgba(26, 26, 26, 0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(212, 175, 55, 0.2);
+}
+
+/* Message bubbles */
+.message-bubble-user {
+  background: linear-gradient(135deg, #991b1b 0%, #7f1d1d 100%);
+  box-shadow: 0 0 10px rgba(153, 27, 27, 0.3);
+}
+
+.message-bubble-ai {
+  background: linear-gradient(135deg, rgba(30, 30, 30, 0.95) 0%, rgba(20, 20, 20, 0.95) 100%);
+  border: 1px solid rgba(212, 175, 55, 0.15);
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Scripture highlight in gold */
+.scripture-highlight {
+  background: linear-gradient(135deg, rgba(212, 175, 55, 0.2) 0%, rgba(184, 134, 11, 0.1) 100%);
+  border-left: 3px solid #d4af37;
+  padding: 8px 12px;
+  margin: 8px 0;
+  border-radius: 0 8px 8px 0;
+}
+
+/* Responsive adjustments */
 @media (max-width: 640px) {
   html {
     font-size: 14px;
+  }
+  
+  .gold-gradient-text {
+    filter: drop-shadow(0 0 4px rgba(212, 175, 55, 0.3));
   }
 }

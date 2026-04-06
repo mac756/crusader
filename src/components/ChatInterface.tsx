@@ -1,53 +1,60 @@
 import { useState, useRef, useEffect } from 'react'
-import { Send, Moon, BookOpen, Sword, Sparkles, Mic, MicOff, Search, Wifi, WifiOff, Brain, Quote } from 'lucide-react'
+import { Send, Mic, MicOff, Wifi, WifiOff, MessageSquare, GraduationCap, BookOpen } from 'lucide-react'
 import MessageBubble from './MessageBubble'
-import ScriptureLookup from './ScriptureLookup'
-import DebateMode from './DebateMode'
-import DailyDevotional from './DailyDevotional'
-import ThoughtsPanel from './ThoughtsPanel'
 import { useChat } from '../hooks/useChat'
-
-interface ChatInterfaceProps {
-  darkMode: boolean
-}
-
-type Mode = 'chat' | 'scripture' | 'debate' | 'devotional'
 
 const API_URL = 'http://localhost:3001'
 
-// Bible verses to display while thinking
+// Mode types per SPEC
+type Mode = 'debator' | 'instructor' | 'reader'
+
+// Bible verses for thinking indicator
 const THINKING_VERSES = [
   { verse: "Trust in the Lord with all your heart and lean not on your own understanding.", reference: "Proverbs 3:5" },
   { verse: "I can do all this through him who gives me strength.", reference: "Philippians 4:13" },
   { verse: "For God so loved the world that he gave his one and only Son...", reference: "John 3:16" },
   { verse: "The Lord is my shepherd, I lack nothing.", reference: "Psalm 23:1" },
-  { verse: "Be strong and courageous. Do not be afraid... for the Lord your God goes with you.", reference: "Deuteronomy 31:6" },
+  { verse: "Be strong and courageous. Do not be afraid...", reference: "Deuteronomy 31:6" },
   { verse: "And we know that in all things God works for the good of those who love him.", reference: "Romans 8:28" },
   { verse: "Your word is a lamp for my feet, a light on my path.", reference: "Psalm 119:105" },
-  { verse: "The LORD bless you and keep you; the LORD make his face shine on you.", reference: "Numbers 6:24-25" },
-  { verse: "Peace I leave with you; my peace I give you. I do not give to you as the world gives.", reference: "John 14:27" },
+  { verse: "Peace I leave with you; my peace I give you.", reference: "John 14:27" },
   { verse: "Cast all your anxiety on him because he cares for you.", reference: "1 Peter 5:7" },
-  { verse: "Therefore do not worry about tomorrow, for tomorrow will worry about itself.", reference: "Matthew 6:34" },
-  { verse: "But seek first his kingdom and his righteousness, and all these things will be given to you.", reference: "Matthew 6:33" },
+  { verse: "But seek first his kingdom and his righteousness...", reference: "Matthew 6:33" },
 ]
 
-export default function ChatInterface({ darkMode }: ChatInterfaceProps) {
-  const [mode, setMode] = useState<Mode>('chat')
+const MODE_CONFIG = {
+  debator: {
+    icon: MessageSquare,
+    label: 'DEBATOR',
+    description: 'Defends Christianity, answers objections with Scripture',
+    placeholder: 'Ask a question about faith or share an objection...',
+  },
+  instructor: {
+    icon: GraduationCap,
+    label: 'INSTRUCTOR', 
+    description: 'Gentle teaching, devotionals, guidance on Christian living',
+    placeholder: 'Ask for teaching, devotional help, or prayer guidance...',
+  },
+  reader: {
+    icon: BookOpen,
+    label: 'READER',
+    description: 'Bible lookup, verse-by-verse study, cross-references',
+    placeholder: 'Enter a Bible verse or reference (e.g., John 3:16)...',
+  },
+}
+
+export default function ChatInterface() {
+  const [mode, setMode] = useState<Mode>('debator')
   const [input, setInput] = useState('')
-  const [localDarkMode, setLocalDarkMode] = useState(darkMode)
   const [isRecording, setIsRecording] = useState(false)
-  const [isWebSearchEnabled, setIsWebSearchEnabled] = useState(false)
   const [isConnected, setIsConnected] = useState(false)
-  const [isAILoading, setIsAILoading] = useState(false)
-  const [connectionError, setConnectionError] = useState<string | null>(null)
-  const [showThoughts, setShowThoughts] = useState(false)
-  const [isSpeakingEspeak, setIsSpeakingEspeak] = useState(false)
+  const [isLoading, setIsLoading] = useState(false)
   const [currentThinkingVerse, setCurrentThinkingVerse] = useState(THINKING_VERSES[0])
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLTextAreaElement>(null)
   const mediaRecorderRef = useRef<MediaRecorder | null>(null)
   const chunksRef = useRef<Blob[]>([])
-  const { messages, isLoading, sendMessage, clearMessages } = useChat()
+  const { messages, sendMessage } = useChat()
 
   // Check API connection
   useEffect(() => {
@@ -58,10 +65,8 @@ export default function ChatInterface({ darkMode }: ChatInterfaceProps) {
         const res = await fetch(`${API_URL}/health`, { signal: controller.signal });
         clearTimeout(timeout);
         setIsConnected(res.ok);
-        setConnectionError(null);
       } catch {
         setIsConnected(false);
-        setConnectionError('AI server not connected. Run: npm run server');
       }
     };
     checkConnection();
@@ -69,24 +74,18 @@ export default function ChatInterface({ darkMode }: ChatInterfaceProps) {
     return () => clearInterval(interval);
   }, []);
 
-  // Sync with parent dark mode
+  // Cycle through verses while thinking
   useEffect(() => {
-    setLocalDarkMode(darkMode)
-  }, [darkMode])
-
-  // Cycle through bible verses while thinking
-  useEffect(() => {
-    if (isLoading || isAILoading) {
+    if (isLoading) {
       const interval = setInterval(() => {
         setCurrentThinkingVerse(prev => {
-          const currentIndex = THINKING_VERSES.findIndex(v => v.reference === prev.reference)
-          const nextIndex = (currentIndex + 1) % THINKING_VERSES.length
-          return THINKING_VERSES[nextIndex]
+          const idx = THINKING_VERSES.findIndex(v => v.reference === prev.reference)
+          return THINKING_VERSES[(idx + 1) % THINKING_VERSES.length]
         })
       }, 4000)
       return () => clearInterval(interval)
     }
-  }, [isLoading, isAILoading])
+  }, [isLoading])
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -105,9 +104,7 @@ export default function ChatInterface({ darkMode }: ChatInterfaceProps) {
       chunksRef.current = [];
 
       mediaRecorder.ondataavailable = (e) => {
-        if (e.data.size > 0) {
-          chunksRef.current.push(e.data);
-        }
+        if (e.data.size > 0) chunksRef.current.push(e.data);
       };
 
       mediaRecorder.onstop = async () => {
@@ -119,8 +116,7 @@ export default function ChatInterface({ darkMode }: ChatInterfaceProps) {
       mediaRecorder.start();
       setIsRecording(true);
     } catch (err) {
-      console.error('Error starting recording:', err);
-      alert('Could not access microphone. Please check permissions.');
+      console.error('Recording error:', err);
     }
   };
 
@@ -132,7 +128,7 @@ export default function ChatInterface({ darkMode }: ChatInterfaceProps) {
   };
 
   const transcribeAudio = async (blob: Blob) => {
-    setIsAILoading(true);
+    setIsLoading(true);
     try {
       const reader = new FileReader();
       reader.onload = async () => {
@@ -145,81 +141,33 @@ export default function ChatInterface({ darkMode }: ChatInterfaceProps) {
         const data = await response.json();
         if (data.transcript) {
           setInput(prev => prev + (prev ? ' ' : '') + data.transcript);
-        } else {
-          alert('Could not understand audio. Please try again.');
         }
       };
       reader.readAsDataURL(blob);
     } catch (err) {
       console.error('Transcription error:', err);
-      alert('Transcription failed. Please try again.');
     } finally {
-      setIsAILoading(false);
+      setIsLoading(false);
     }
   };
 
-  // espeak-ng TTS
-  const speakWithEspeak = async (text: string) => {
-    if (isSpeakingEspeak) return;
-    setIsSpeakingEspeak(true);
-    try {
-      const response = await fetch(`${API_URL}/api/tts`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ text })
-      });
-      
-      if (!response.ok) throw new Error('TTS failed');
-      
-      const audioBuffer = await response.arrayBuffer();
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)();
-      const audioData = await audioContext.decodeAudioData(audioBuffer);
-      const source = audioContext.createBufferSource();
-      source.buffer = audioData;
-      source.connect(audioContext.destination);
-      source.onended = () => setIsSpeakingEspeak(false);
-      source.start(0);
-    } catch (err) {
-      console.error('espeak-ng TTS error:', err);
-      setIsSpeakingEspeak(false);
-    }
-  };
-
-  // API call for chat
   const callAPI = async (content: string, chatMode: string) => {
-    try {
-      const history = messages.map(m => ({ role: m.role, content: m.content }));
-      const response = await fetch(`${API_URL}/api/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          message: content, 
-          mode: chatMode,
-          conversationHistory: history,
-          search: isWebSearchEnabled
-        })
-      });
-      
-      if (!response.ok) {
-        throw new Error(`API error: ${response.status}`);
-      }
-      
-      const data = await response.json();
-      return data.response;
-    } catch (err) {
-      console.error('API call failed:', err);
-      throw err;
-    }
+    const history = messages.map(m => ({ role: m.role, content: m.content }));
+    const response = await fetch(`${API_URL}/api/chat`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ message: content, mode: chatMode, conversationHistory: history })
+    });
+    if (!response.ok) throw new Error(`API error: ${response.status}`);
+    const data = await response.json();
+    return data.response;
   };
 
   const handleSend = async () => {
-    if (!input.trim() || isLoading || isAILoading) return
+    if (!input.trim() || isLoading) return
     const userMessage = input.trim()
-    const currentMode = mode
-    
-    // Add user message
     setInput('')
-    await sendMessage(userMessage, currentMode, callAPI)
+    await sendMessage(userMessage, mode, callAPI)
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
@@ -229,238 +177,121 @@ export default function ChatInterface({ darkMode }: ChatInterfaceProps) {
     }
   }
 
-  const handleQuickAction = async (action: string) => {
+  const handleQuickAction = (action: string) => {
     const actions: Record<string, string> = {
       verse: 'Share a meaningful Bible verse for today.',
-      news: 'What are the latest Christian news headlines?',
       prayer: 'Share a short prayer for the day.',
       explain: 'Explain the Gospel in simple terms.',
-      search: 'Search the web for current Christian events and news.',
+      evil: 'How do you respond to the problem of evil?',
+      suffering: 'Why does God allow suffering?',
     }
-    if (actions[action]) {
-      setInput(actions[action])
-    }
+    if (actions[action]) setInput(actions[action])
   }
 
-  const handleSpeak = (text: string) => {
-    speakWithEspeak(text)
-  }
-
-  const modeConfig = {
-    chat: {
-      icon: Sparkles,
-      label: 'Chat',
-      description: 'Ask questions about faith, theology, and Christian living',
-    },
-    scripture: {
-      icon: BookOpen,
-      label: 'Scripture',
-      description: 'Look up Bible verses and get interpretations',
-    },
-    debate: {
-      icon: Sword,
-      label: 'Debate',
-      description: 'Engage in theological debate with apologetics',
-    },
-    devotional: {
-      icon: Sparkles,
-      label: 'Devotional',
-      description: 'Daily verse with devotional commentary',
-    },
-  }
-
-  const isThinking = isLoading || isAILoading
+  const isThinking = isLoading
 
   return (
-    <div className={`flex flex-col h-[calc(100vh-180px)] rounded-2xl overflow-hidden shadow-2xl ${localDarkMode ? 'bg-gray-900' : 'bg-white'}`}>
-      {/* Mode Tabs */}
-      <div className={`flex items-center justify-between px-4 py-3 border-b ${localDarkMode ? 'bg-gray-800 border-gray-700' : 'bg-crusader-50 border-crusader-200'}`}>
-        <div className="flex items-center gap-2">
-          {(Object.keys(modeConfig) as Mode[]).map((m) => {
-            const Icon = modeConfig[m].icon
+    <div className="flex flex-col h-full">
+      {/* Mode Tabs - Fixed ~50px */}
+      <div className="flex-shrink-0 bg-[#0f0808] border-b border-gold-500/20">
+        <div className="flex">
+          {(Object.keys(MODE_CONFIG) as Mode[]).map((m) => {
+            const ModeIcon = MODE_CONFIG[m].icon
+            const isActive = mode === m
             return (
               <button
                 key={m}
                 onClick={() => setMode(m)}
-                className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all ${
-                  mode === m
-                    ? 'bg-crusader-700 text-white shadow-md'
-                    : localDarkMode
-                    ? 'text-gray-300 hover:bg-gray-700'
-                    : 'text-crusader-700 hover:bg-crusader-100'
+                className={`flex-1 flex items-center justify-center gap-2 py-3 text-sm font-semibold tracking-wide transition-all duration-300 border-b-2 ${
+                  isActive
+                    ? 'bg-gradient-to-b from-[#1a0a0a] to-[#0f0808] text-gold-400 border-gold-500'
+                    : 'text-gold-500/50 border-transparent hover:bg-[#1a0a0a]/50 hover:text-gold-400/70'
                 }`}
+                style={isActive ? { boxShadow: '0 0 20px rgba(212, 175, 55, 0.2)' } : {}}
               >
-                <Icon className="w-4 h-4" />
-                <span className="hidden sm:inline">{modeConfig[m].label}</span>
+                <ModeIcon className="w-4 h-4" />
+                <span>{MODE_CONFIG[m].label}</span>
               </button>
             )
           })}
         </div>
-        <div className="flex items-center gap-2">
-          {/* Thoughts Toggle */}
-          <button
-            onClick={() => setShowThoughts(!showThoughts)}
-            className={`flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-all ${
-              showThoughts
-                ? 'bg-purple-600 text-white'
-                : localDarkMode
-                ? 'bg-gray-700 text-gray-400'
-                : 'bg-crusader-100 text-crusader-600'
-            }`}
-            title={showThoughts ? 'Hide AI Thoughts' : 'Show AI Thoughts'}
-          >
-            <Brain className="w-3 h-3" />
-            <span className="hidden md:inline">Thoughts</span>
-          </button>
-          
-          {/* Connection Status */}
-          <button
-            onClick={() => setIsWebSearchEnabled(!isWebSearchEnabled)}
-            className={`flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs font-medium transition-all ${
-              isWebSearchEnabled
-                ? 'bg-green-600 text-white'
-                : localDarkMode
-                ? 'bg-gray-700 text-gray-400'
-                : 'bg-crusader-100 text-crusader-600'
-            }`}
-            title={isWebSearchEnabled ? 'Web Search ON' : 'Web Search OFF'}
-          >
-            <Search className="w-3 h-3" />
-            <span className="hidden md:inline">Web</span>
-          </button>
-          
-          {/* Connection Indicator */}
-          <div className={`flex items-center gap-1 px-2 py-1.5 rounded-lg text-xs ${
-            isConnected 
-              ? 'bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300' 
-              : 'bg-red-100 text-red-700 dark:bg-red-900 dark:text-red-300'
-          }`}>
-            {isConnected ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
-            <span className="hidden md:inline">{isConnected ? 'AI' : 'Local'}</span>
-          </div>
-          
-          <button
-            onClick={() => setLocalDarkMode(!localDarkMode)}
-            className={`p-2 rounded-lg transition-colors ${localDarkMode ? 'bg-gray-700 text-yellow-400' : 'bg-crusader-100 text-crusader-700'}`}
-            aria-label="Toggle dark mode"
-          >
-            <Moon className="w-4 h-4" />
-          </button>
-          <button
-            onClick={clearMessages}
-            className={`px-3 py-2 rounded-lg text-sm font-medium transition-colors ${localDarkMode ? 'bg-gray-700 text-gray-300 hover:bg-gray-600' : 'bg-crusader-100 text-crusader-700 hover:bg-crusader-200'}`}
-          >
-            Clear
-          </button>
-        </div>
       </div>
 
-      {/* Messages */}
-      <div className={`flex-1 overflow-y-auto p-4 space-y-4 message-container ${localDarkMode ? 'bg-gray-800' : 'bg-crusader-50/50'}`}>
-        {connectionError && (
-          <div className={`text-center py-3 px-4 rounded-lg text-sm ${localDarkMode ? 'bg-red-900/50 text-red-300' : 'bg-red-50 text-red-600'}`}>
-            {connectionError}
-          </div>
-        )}
-        
-        {mode === 'devotional' ? (
-          <DailyDevotional darkMode={localDarkMode} onSpeak={handleSpeak} />
-        ) : messages.length === 0 ? (
-          <div className="text-center py-12 animate-fadeIn">
+      {/* Chat Messages - Scrollable, flex-1 */}
+      <div className="flex-1 overflow-y-auto p-4 space-y-4 bg-gradient-to-b from-[#0f0f0f] to-[#141414] scrollable-chat">
+        {messages.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full text-center animate-fadeIn">
             {/* Welcome Logo */}
-            <div className="w-20 h-20 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-crusader-600 to-crusader-800 flex items-center justify-center shadow-lg border-2 border-gold-500/30">
-              <svg viewBox="0 0 64 64" className="w-12 h-12" fill="none">
-                <path d="M32 8L12 16V32C12 44 32 56 32 56C32 56 52 44 52 32V16L32 8Z" fill="url(#welcomeGrad)" stroke="#d4af37" strokeWidth="2"/>
+            <div className="w-16 h-16 mx-auto mb-4 rounded-xl bg-gradient-to-br from-[#7f1d1d] to-[#450a0a] flex items-center justify-center border border-gold-500/30"
+              style={{ boxShadow: '0 0 20px rgba(212, 175, 55, 0.15)' }}
+            >
+              <svg viewBox="0 0 64 64" className="w-10 h-10" fill="none">
+                <path d="M32 8L12 16V32C12 44 32 56 32 56C32 56 52 44 52 32V16L32 8Z" fill="#991b1b" stroke="#d4af37" strokeWidth="2"/>
                 <rect x="28" y="22" width="8" height="24" rx="1" fill="#d4af37"/>
                 <rect x="22" y="28" width="20" height="8" rx="1" fill="#d4af37"/>
-                <defs>
-                  <linearGradient id="welcomeGrad" x1="32" y1="8" x2="32" y2="56">
-                    <stop stopColor="#991b1b"/>
-                    <stop offset="1" stopColor="#7f1d1d"/>
-                  </linearGradient>
-                </defs>
               </svg>
             </div>
             
-            <h2 className={`text-2xl font-bold mb-2 ${localDarkMode ? 'text-white' : 'text-crusader-900'}`}>
+            <h2 className="text-lg font-bold text-white mb-1">
               Welcome to <span className="gold-gradient-text">Crusader</span>
             </h2>
-            <p className={`text-sm mb-2 max-w-md mx-auto ${localDarkMode ? 'text-gray-400' : 'text-crusader-600'}`}>
-              {modeConfig[mode].description}
+            <p className="text-xs text-gray-400 mb-4 max-w-xs">
+              {MODE_CONFIG[mode].description}
             </p>
-            {isWebSearchEnabled && (
-              <p className={`text-xs mb-4 max-w-md mx-auto ${localDarkMode ? 'text-green-400' : 'text-green-600'}`}>
-                Web search enabled - AI will search for current information
-              </p>
-            )}
-            <div className="flex flex-wrap justify-center gap-2 mt-6">
-              {mode === 'chat' && (
+            
+            {/* Quick Actions */}
+            <div className="flex flex-wrap justify-center gap-2">
+              {mode === 'debator' && (
                 <>
-                  <button onClick={() => handleQuickAction('verse')} className="px-4 py-2 bg-gradient-to-r from-gold-500 to-gold-600 text-white rounded-full text-sm hover:shadow-lg hover:scale-105 transition-all">
-                    Daily Verse
-                  </button>
-                  <button onClick={() => handleQuickAction('news')} className="px-4 py-2 bg-gradient-to-r from-crusader-600 to-crusader-700 text-white rounded-full text-sm hover:shadow-lg hover:scale-105 transition-all">
-                    Christian News
-                  </button>
-                  <button onClick={() => handleQuickAction('explain')} className="px-4 py-2 bg-gradient-to-r from-crusader-600 to-crusader-700 text-white rounded-full text-sm hover:shadow-lg hover:scale-105 transition-all">
-                    Explain Gospel
-                  </button>
-                </>
-              )}
-              {mode === 'scripture' && (
-                <>
-                  <button onClick={() => setInput('John 3:16')} className="px-4 py-2 bg-gradient-to-r from-gold-500 to-gold-600 text-white rounded-full text-sm hover:shadow-lg hover:scale-105 transition-all">
-                    John 3:16
-                  </button>
-                  <button onClick={() => setInput('Psalm 23')} className="px-4 py-2 bg-gradient-to-r from-crusader-600 to-crusader-700 text-white rounded-full text-sm hover:shadow-lg hover:scale-105 transition-all">
-                    Psalm 23
-                  </button>
-                  <button onClick={() => setInput('Romans 8:28')} className="px-4 py-2 bg-gradient-to-r from-crusader-600 to-crusader-700 text-white rounded-full text-sm hover:shadow-lg hover:scale-105 transition-all">
-                    Romans 8:28
-                  </button>
-                </>
-              )}
-              {mode === 'debate' && (
-                <>
-                  <button onClick={() => setInput('How do you respond to the problem of evil?')} className="px-4 py-2 bg-gradient-to-r from-gold-500 to-gold-600 text-white rounded-full text-sm hover:shadow-lg hover:scale-105 transition-all">
+                  <button onClick={() => handleQuickAction('evil')} className="px-3 py-1.5 bg-[#991b1b] text-gold-300 rounded-full text-xs hover:bg-[#7f1d1d] transition-all border border-gold-500/20">
                     Problem of Evil
                   </button>
-                  <button onClick={() => setInput('Why does God allow suffering?')} className="px-4 py-2 bg-gradient-to-r from-crusader-600 to-crusader-700 text-white rounded-full text-sm hover:shadow-lg hover:scale-105 transition-all">
+                  <button onClick={() => handleQuickAction('suffering')} className="px-3 py-1.5 bg-[#991b1b] text-gold-300 rounded-full text-xs hover:bg-[#7f1d1d] transition-all border border-gold-500/20">
                     Why Suffering?
                   </button>
                 </>
               )}
+              {mode === 'instructor' && (
+                <>
+                  <button onClick={() => handleQuickAction('verse')} className="px-3 py-1.5 bg-[#991b1b] text-gold-300 rounded-full text-xs hover:bg-[#7f1d1d] transition-all border border-gold-500/20">
+                    Daily Verse
+                  </button>
+                  <button onClick={() => handleQuickAction('prayer')} className="px-3 py-1.5 bg-[#991b1b] text-gold-300 rounded-full text-xs hover:bg-[#7f1d1d] transition-all border border-gold-500/20">
+                    Prayer Help
+                  </button>
+                  <button onClick={() => handleQuickAction('explain')} className="px-3 py-1.5 bg-[#991b1b] text-gold-300 rounded-full text-xs hover:bg-[#7f1d1d] transition-all border border-gold-500/20">
+                    Explain Gospel
+                  </button>
+                </>
+              )}
+              {mode === 'reader' && (
+                <>
+                  <button onClick={() => setInput('John 3:16')} className="px-3 py-1.5 bg-[#991b1b] text-gold-300 rounded-full text-xs hover:bg-[#7f1d1d] transition-all border border-gold-500/20">
+                    John 3:16
+                  </button>
+                  <button onClick={() => setInput('Psalm 23')} className="px-3 py-1.5 bg-[#991b1b] text-gold-300 rounded-full text-xs hover:bg-[#7f1d1d] transition-all border border-gold-500/20">
+                    Psalm 23
+                  </button>
+                  <button onClick={() => setInput('Romans 8:28')} className="px-3 py-1.5 bg-[#991b1b] text-gold-300 rounded-full text-xs hover:bg-[#7f1d1d] transition-all border border-gold-500/20">
+                    Romans 8:28
+                  </button>
+                </>
+              )}
             </div>
           </div>
-        ) : null}
+        ) : (
+          messages.map((message, index) => (
+            <MessageBubble key={index} message={message} darkMode={true} />
+          ))
+        )}
         
-        {messages.map((message, index) => (
-          <div key={index}>
-            <MessageBubble 
-              message={message} 
-              darkMode={localDarkMode} 
-              onSpeak={message.role === 'user' ? undefined : handleSpeak}
-            />
-            {/* Show thoughts panel for the last assistant message */}
-            {message.role === 'assistant' && index === messages.length - 1 && message.thoughts && (
-              <div className="mt-2">
-                <ThoughtsPanel 
-                  darkMode={localDarkMode} 
-                  isVisible={showThoughts}
-                  onToggle={() => setShowThoughts(!showThoughts)}
-                  thoughts={message.thoughts}
-                />
-              </div>
-            )}
-          </div>
-        ))}
-        
-        {/* Thinking Banner with Bible Verse */}
+        {/* Thinking Indicator with Bible Verse */}
         {isThinking && (
           <div className="thinking-banner rounded-2xl p-4 animate-slideUp">
             <div className="flex items-start gap-3">
-              {/* Animated Cross/Sword Icon */}
-              <div className="w-10 h-10 rounded-full bg-gold-500/20 flex items-center justify-center flex-shrink-0 border border-gold-500/40">
+              <div className="w-10 h-10 rounded-full bg-gold-500/20 flex items-center justify-center flex-shrink-0 border border-gold-500/40"
+                style={{ boxShadow: '0 0 10px rgba(212, 175, 55, 0.3)' }}
+              >
                 <svg viewBox="0 0 24 24" className="w-5 h-5 text-gold-400 animate-pulse" fill="currentColor">
                   <rect x="10" y="2" width="4" height="20" rx="1" />
                   <rect x="3" y="9" width="18" height="4" rx="1" />
@@ -468,29 +299,28 @@ export default function ChatInterface({ darkMode }: ChatInterfaceProps) {
               </div>
               
               <div className="flex-1 min-w-0">
-                {/* Thinking Label */}
                 <div className="flex items-center gap-2 mb-2">
-                  <div className="flex items-center gap-1">
+                  <div className="flex gap-1">
                     <span className="w-2 h-2 bg-gold-400 rounded-full typing-dot"></span>
                     <span className="w-2 h-2 bg-gold-400 rounded-full typing-dot"></span>
                     <span className="w-2 h-2 bg-gold-400 rounded-full typing-dot"></span>
                   </div>
                   <span className="text-gold-200 text-sm font-medium">
-                    {isAILoading ? 'Transcribing...' : 'Crusader is seeking wisdom...'}
+                    Crusader is seeking wisdom...
                   </span>
                 </div>
                 
-                {/* Bible Verse Card */}
-                <div className="bible-verse-card rounded-xl p-4 relative overflow-hidden">
-                  {/* Quote Icon */}
-                  <div className="absolute top-2 right-2 opacity-10">
-                    <Quote className="w-8 h-8 text-gold-500" />
+                <div className="bible-verse-card rounded-xl p-3 relative overflow-hidden">
+                  <div className="absolute top-1 right-1 opacity-10">
+                    <svg viewBox="0 0 24 24" className="w-6 h-6 text-gold-500" fill="currentColor">
+                      <rect x="10" y="2" width="4" height="20" rx="1" />
+                      <rect x="3" y="9" width="18" height="4" rx="1" />
+                    </svg>
                   </div>
-                  
-                  <p className="text-gold-100/90 text-sm italic leading-relaxed mb-2 font-serif">
+                  <p className="text-gold-100/90 text-xs italic leading-relaxed mb-1 font-serif">
                     "{currentThinkingVerse.verse}"
                   </p>
-                  <p className="text-gold-400/80 text-xs font-semibold tracking-wider">
+                  <p className="text-gold-400/80 text-[10px] font-semibold tracking-wider">
                     — {currentThinkingVerse.reference}
                   </p>
                 </div>
@@ -498,67 +328,63 @@ export default function ChatInterface({ darkMode }: ChatInterfaceProps) {
             </div>
           </div>
         )}
+        
         <div ref={messagesEndRef} />
       </div>
 
-      {/* Scripture Lookup Panel */}
-      {mode === 'scripture' && <ScriptureLookup onSelect={(ref) => setInput(ref)} darkMode={localDarkMode} />}
-
-      {/* Debate Mode Panel */}
-      {mode === 'debate' && <DebateMode onSelect={(topic) => setInput(topic)} darkMode={localDarkMode} />}
-
-      {/* Input */}
-      {mode !== 'devotional' && (
-        <div className={`p-4 border-t ${localDarkMode ? 'bg-gray-900 border-gray-700' : 'bg-white border-crusader-200'}`}>
-          <div className={`flex items-end gap-3 p-3 rounded-2xl ${localDarkMode ? 'bg-gray-800 border border-gray-700' : 'bg-crusader-50 border border-crusader-200'}`}>
-            <textarea
-              ref={inputRef}
-              value={input}
-              onChange={(e) => setInput(e.target.value)}
-              onKeyDown={handleKeyDown}
-              placeholder={`Ask Crusader about ${mode === 'scripture' ? 'scripture' : mode === 'debate' ? 'theology and debate' : 'Christianity'}...`}
-              className={`flex-1 resize-none bg-transparent border-none outline-none text-base ${localDarkMode ? 'text-white placeholder-gray-500' : 'text-crusader-900 placeholder-crusader-400'}`}
-              rows={1}
-              disabled={isLoading || isAILoading}
-            />
-            
-            {/* Voice Input Button */}
-            <button
-              onClick={isRecording ? stopRecording : startRecording}
-              disabled={isLoading || isAILoading}
-              className={`p-3 rounded-full transition-all ${
-                isRecording
-                  ? 'bg-red-500 text-white animate-pulse'
-                  : localDarkMode
-                  ? 'bg-gray-700 text-gray-300 hover:bg-gray-600'
-                  : 'bg-crusader-100 text-crusader-600 hover:bg-crusader-200'
-              } ${(isLoading || isAILoading) ? 'opacity-50' : ''}`}
-              aria-label={isRecording ? 'Stop recording' : 'Start voice input'}
-              title={isRecording ? 'Stop recording' : 'Voice input'}
-            >
-              {isRecording ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
-            </button>
-            
-            <button
-              onClick={handleSend}
-              disabled={!input.trim() || isLoading || isAILoading}
-              className={`p-3 rounded-full transition-all ${
-                input.trim() && !isLoading && !isAILoading
-                  ? 'bg-gradient-to-r from-crusader-600 to-crusader-700 text-white shadow-lg hover:shadow-xl hover:scale-105'
-                  : localDarkMode
-                  ? 'bg-gray-700 text-gray-500'
-                  : 'bg-crusader-200 text-crusader-400'
-              }`}
-              aria-label="Send message"
-            >
-              <Send className="w-5 h-5" />
-            </button>
-          </div>
-          <p className={`text-xs text-center mt-2 ${localDarkMode ? 'text-gray-500' : 'text-crusader-400'}`}>
-            {isRecording ? 'Recording... Click mic to stop' : 'Press Enter to send • Click mic for voice • God bless!'}
-          </p>
+      {/* Input Area - Fixed ~80px */}
+      <div className="flex-shrink-0 p-3 bg-[#0a0505] border-t border-gold-500/20">
+        <div className="flex items-end gap-2 p-2 rounded-xl bg-[#1a1a1a] border border-gold-500/20">
+          <textarea
+            ref={inputRef}
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            onKeyDown={handleKeyDown}
+            placeholder={MODE_CONFIG[mode].placeholder}
+            className="flex-1 resize-none bg-transparent border-none outline-none text-sm text-white placeholder-gray-500"
+            rows={1}
+            disabled={isLoading}
+          />
+          
+          {/* Voice Input */}
+          <button
+            onClick={isRecording ? stopRecording : startRecording}
+            disabled={isLoading}
+            className={`p-2 rounded-full transition-all ${
+              isRecording
+                ? 'bg-red-500 text-white animate-pulse'
+                : 'bg-[#2a2a2a] text-gray-400 hover:bg-[#3a3a3a]'
+            } ${isLoading ? 'opacity-50' : ''}`}
+            title={isRecording ? 'Stop recording' : 'Voice input'}
+          >
+            {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+          </button>
+          
+          {/* Send Button */}
+          <button
+            onClick={handleSend}
+            disabled={!input.trim() || isLoading}
+            className={`p-2 rounded-full transition-all ${
+              input.trim() && !isLoading
+                ? 'bg-gradient-to-r from-[#991b1b] to-[#7f1d1d] text-white'
+                : 'bg-[#2a2a2a] text-gray-500'
+            }`}
+            style={input.trim() && !isLoading ? { boxShadow: '0 0 15px rgba(153, 27, 27, 0.4)' } : {}}
+            title="Send message"
+          >
+            <Send className="w-4 h-4" />
+          </button>
         </div>
-      )}
+        
+        {/* Status Bar */}
+        <div className="flex items-center justify-between mt-1.5 px-1">
+          <span className="text-[9px] text-gray-500">Press Enter to send</span>
+          <div className={`flex items-center gap-1 text-[9px] ${isConnected ? 'text-green-400' : 'text-red-400'}`}>
+            {isConnected ? <Wifi className="w-3 h-3" /> : <WifiOff className="w-3 h-3" />}
+            <span>{isConnected ? 'AI Connected' : 'Local Mode'}</span>
+          </div>
+        </div>
+      </div>
     </div>
   )
 }
