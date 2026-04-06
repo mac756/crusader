@@ -4,9 +4,10 @@ import type { Message } from '../hooks/useChat'
 interface MessageBubbleProps {
   message: Message
   darkMode: boolean
+  isLightTerminal?: boolean
 }
 
-export default function MessageBubble({ message, darkMode }: MessageBubbleProps) {
+export default function MessageBubble({ message, darkMode, isLightTerminal = false }: MessageBubbleProps) {
   const isUser = message.role === 'user'
   
   return (
@@ -14,88 +15,73 @@ export default function MessageBubble({ message, darkMode }: MessageBubbleProps)
       {/* Avatar */}
       <div className={`w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 ${
         isUser 
-          ? 'bg-red-600' 
-          : 'bg-red-700'
+          ? isLightTerminal ? 'bg-red-600 border border-red-400' : 'bg-red-600' 
+          : isLightTerminal ? 'bg-black border-2 border-yellow-400' : 'bg-red-700'
       }`}>
         {isUser ? (
           <User className="w-4 h-4 text-white" />
         ) : (
-          <span className="text-white text-sm">✝</span>
+          isLightTerminal ? (
+            <span className="text-yellow-400 text-xs font-mono font-bold">C</span>
+          ) : (
+            <span className="text-white text-sm">✝</span>
+          )
         )}
       </div>
       
       {/* Message Content */}
-      <div className={`max-w-[85%] sm:max-w-[75%] lg:max-w-[70%] px-4 py-3 rounded-2xl shadow-sm ${
+      <div className={`max-w-[85%] sm:max-w-[75%] lg:max-w-[70%] px-4 py-3 rounded-2xl shadow-sm font-mono text-sm ${
         isUser
-          ? 'bg-red-600 text-white rounded-tr-sm'
-          : darkMode
-            ? 'bg-gray-700 text-white rounded-tl-sm border border-gray-600'
-            : 'bg-white text-gray-800 rounded-tl-sm border border-gray-200'
+          ? isLightTerminal
+            ? 'bg-red-600 text-yellow-400 rounded-tr-sm border border-yellow-400/30'
+            : 'bg-red-600 text-white rounded-tr-sm'
+          : isLightTerminal
+            ? 'bg-black text-green-400 rounded-tl-sm border border-gray-700'
+            : darkMode
+              ? 'bg-gray-700 text-white rounded-tl-sm border border-gray-600'
+              : 'bg-white text-gray-800 rounded-tl-sm border border-gray-200'
       }`}>
         {/* Name */}
-        <div className={`text-xs font-semibold tracking-wide uppercase mb-1 ${
-          isUser ? 'text-red-200' : 'text-red-600'
+        <div className={`text-xs font-bold uppercase tracking-wider mb-1 ${
+          isUser 
+            ? isLightTerminal ? 'text-yellow-200' : 'text-red-200'
+            : isLightTerminal ? 'text-yellow-400' : 'text-red-600'
         }`}>
-          {isUser ? 'You' : 'Crusader'}
+          {isLightTerminal ? (isUser ? '> USER' : '$ CRUSADER') : (isUser ? 'You' : 'Crusader')}
         </div>
         
         {/* Message text */}
-        <div className={`text-sm leading-relaxed ${isUser ? '' : 'font-serif'}`}>
-          {formatMessage(message.content)}
+        <div className={`leading-relaxed ${isUser || isLightTerminal ? '' : 'font-serif'}`}>
+          {formatMessage(message.content, isLightTerminal)}
         </div>
         
         {/* Timestamp */}
         <p className={`text-xs mt-2 ${
-          isUser ? 'text-red-200' : 'text-gray-400'
+          isUser 
+            ? isLightTerminal ? 'text-yellow-300/50' : 'text-red-200' 
+            : isLightTerminal ? 'text-gray-500' : 'text-gray-400'
         }`}>
           {message.timestamp.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
         </p>
-        
       </div>
     </div>
   )
 }
 
-// Format message content with basic markdown-like styling
-function formatMessage(content: string): React.ReactNode {
-  // Split by newlines and preserve formatting
+// Format message content
+function formatMessage(content: string, isLightTerminal: boolean): React.ReactNode {
   const lines = content.split('\n')
   
   return lines.map((line, i) => {
-    // Check for scripture references (bold them and style)
+    // Check for scripture references
     if (line.match(/\b(John|Romans|Psalm|Genesis|Exodus|Matthew|Mark|Luke|Acts|Revelation|Isaiah|Jeremiah|Ephesians|Philippians|Colossians|Timothy|Titus|Hebrews|James|Peter|Jude|Proverbs|Psalm)\s*\d+:\d+\b/gi)) {
       return (
-        <p key={i} className="text-crusader-700 dark:text-gold-300 font-serif italic my-3 py-2 px-3 bg-crusader-50/50 dark:bg-gray-600/30 rounded-lg border-l-2 border-gold-500">
+        <p key={i} className={`italic my-2 py-2 px-3 rounded border-l-2 ${
+          isLightTerminal 
+            ? 'text-yellow-300 border-yellow-400 bg-black' 
+            : 'text-red-700 dark:text-yellow-300 border-red-500 bg-gray-50 dark:bg-gray-600/30'
+        }`}>
           {line}
-        </p>
-      )
-    }
-    
-    // Check for bold headers (like "1. God's Love")
-    if (line.match(/^\d+\.\s+\*\*[A-Z]/)) {
-      return (
-        <p key={i} className="font-semibold text-crusader-800 dark:text-gold-300 my-2">
-          {line.replace(/\*\*/g, '')}
-        </p>
-      )
-    }
-    
-    // Check for bullet points
-    if (line.startsWith('•') || line.startsWith('-')) {
-      return (
-        <p key={i} className="ml-4 my-2 flex items-start gap-2">
-          <span className="text-gold-500 mt-1">•</span>
-          <span>{line.substring(1).trim()}</span>
-        </p>
-      )
-    }
-    
-    // Check for numbered lists
-    if (line.match(/^\d+\./)) {
-      return (
-        <p key={i} className="ml-4 my-2 flex items-start gap-2">
-          <span className="text-gold-500 font-semibold">{line.match(/^\d+/)}.</span>
-          <span>{line.replace(/^\d+\.\s*/, '')}</span>
         </p>
       )
     }
@@ -105,23 +91,22 @@ function formatMessage(content: string): React.ReactNode {
       return <br key={i} />
     }
     
-    // Regular paragraphs - highlight key phrases
+    // Regular text
     return (
       <p key={i} className="my-1">
-        {highlightPhrases(line)}
+        {highlightPhrases(line, isLightTerminal)}
       </p>
     )
   })
 }
 
 // Highlight important phrases
-function highlightPhrases(text: string): React.ReactNode {
-  // Split by scripture-like patterns to highlight them
+function highlightPhrases(text: string, isLightTerminal: boolean): React.ReactNode {
   const parts = text.split(/(\*[^*]+\*)/g)
   
   return parts.map((part, i) => {
     if (part.startsWith('*') && part.endsWith('*')) {
-      return <em key={i} className="text-crusader-600 dark:text-gold-300">{part.slice(1, -1)}</em>
+      return <em key={i} className={isLightTerminal ? 'text-yellow-300' : 'text-red-600 dark:text-yellow-300'}>{part.slice(1, -1)}</em>
     }
     return part
   })

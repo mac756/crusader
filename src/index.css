@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -38,19 +38,10 @@ html, body {
   background: #9ca3af;
 }
 
-/* Dark mode scrollbar */
-.dark ::-webkit-scrollbar-thumb {
-  background: #4b5563;
-}
-
-.dark ::-webkit-scrollbar-thumb:hover {
-  background: #6b7280;
-}
-
 /* Typing indicator animation */
 @keyframes pulse {
-  0%, 100% { opacity: 0.4; }
-  50% { opacity: 1; }
+  0%, 100% { opacity: 0.4; transform: scale(0.8); }
+  50% { opacity: 1; transform: scale(1); }
 }
 
 .typing-dot {
@@ -75,11 +66,6 @@ html, body {
   animation: fadeIn 0.3s ease-out forwards;
 }
 
-/* Smooth transitions */
-.transition-colors {
-  transition: all 0.2s ease;
-}
-
 /* Focus styles */
 button:focus-visible,
 textarea:focus-visible {
@@ -90,4 +76,16 @@ textarea:focus-visible {
 /* Selection */
 ::selection {
   background-color: rgba(220, 38, 38, 0.3);
+}
+
+/* CRT scanline effect for terminal mode */
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100%); }
+}
+
+/* Glow effect for terminal */
+@keyframes glow {
+  0%, 100% { box-shadow: 0 0 5px rgba(34, 197, 94, 0.3); }
+  50% { box-shadow: 0 0 20px rgba(34, 197, 94, 0.6); }
 }
