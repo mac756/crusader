@@ -1,6 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { Moon, Sun, Maximize2, Minimize2 } from 'lucide-react'
 import ChatInterface from './components/ChatInterface'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -95,40 +96,105 @@ function CrusaderLogo({ className = "w-12 h-12" }: { className?: string }) {
 
 function App() {
   const [darkMode, setDarkMode] = useState(false)
+  const [isFullscreen, setIsFullscreen] = useState(false)
+
+  // Listen for fullscreen changes
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setIsFullscreen(!!document.fullscreenElement)
+    }
+    document.addEventListener('fullscreenchange', handleFullscreenChange)
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange)
+  }, [])
+
+  const toggleFullscreen = async () => {
+    try {
+      if (!document.fullscreenElement) {
+        await document.documentElement.requestFullscreen()
+      } else {
+        await document.exitFullscreen()
+      }
+    } catch (err) {
+      console.error('Fullscreen error:', err)
+    }
+  }
 
   return (
     <QueryClientProvider client={queryClient}>
-      <div className={`min-h-screen flex flex-col ${darkMode ? 'bg-gray-900' : ''}`}>
+      <div className={`min-h-screen flex flex-col ${darkMode ? 'bg-gray-900' : 'knight-bg'}`}>
         {/* Header */}
-        <header className={`${darkMode ? 'bg-gray-800/95 border-gray-700' : 'bg-red-700 border-red-800'} px-4 py-3 border-b sticky top-0 z-50`}>
-          <div className="max-w-4xl mx-auto flex items-center gap-3">
-            <CrusaderLogo className="w-11 h-11" />
-            <div>
-              <h1 className={`text-xl font-bold ${darkMode ? 'text-white' : 'text-white'}`}>
-                <span className={darkMode ? 'text-red-400' : 'text-yellow-300'}>CRUSADER</span>
+        <header className={`${darkMode ? 'bg-gray-800/95' : 'bg-crusader-800/95'} backdrop-blur-md border-b border-gold-500/20 sticky top-0 z-50 shield-border`}>
+          <div className="max-w-4xl mx-auto px-4 py-3 flex items-center gap-4">
+            {/* Logo */}
+            <div className="relative">
+              <CrusaderLogo className="w-11 h-11" />
+              <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-gold-500 rounded-full border-2 border-crusader-800"></div>
+            </div>
+            
+            {/* Title */}
+            <div className="flex flex-col">
+              <h1 className="text-xl font-bold text-white tracking-tight">
+                <span className="gold-gradient-text">CRUSADER</span>
               </h1>
-              <p className={`text-xs ${darkMode ? 'text-gray-400' : 'text-red-200'}`}>
+              <p className="text-xs text-gold-300/80 font-medium tracking-widest uppercase">
                 Christian AI Assistant
               </p>
             </div>
-            <div className="ml-auto">
+            
+            {/* Decorative cross */}
+            <div className="hidden sm:flex ml-2 opacity-30">
+              <svg viewBox="0 0 24 24" className="w-6 h-6 text-gold-500" fill="currentColor">
+                <rect x="10" y="3" width="4" height="18" rx="1" />
+                <rect x="4" y="9" width="16" height="4" rx="1" />
+              </svg>
+            </div>
+            
+            <div className="ml-auto flex items-center gap-2">
+              <button
+                onClick={toggleFullscreen}
+                className={`p-2.5 rounded-lg transition-all duration-200 ${darkMode ? 'bg-gray-700 text-white hover:bg-gray-600' : 'bg-crusader-700 text-gold-300 hover:bg-crusader-600'}`}
+                aria-label={isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}
+                title={isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+              >
+                {isFullscreen ? <Minimize2 className="w-5 h-5" /> : <Maximize2 className="w-5 h-5" />}
+              </button>
               <button
                 onClick={() => setDarkMode(!darkMode)}
-                className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors ${
-                  darkMode 
-                    ? 'bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30' 
-                    : 'bg-white/20 text-white hover:bg-white/30'
-                }`}
+                className={`p-2.5 rounded-lg transition-all duration-200 ${darkMode ? 'bg-gray-700 text-yellow-400 hover:bg-gray-600' : 'bg-crusader-700 text-gold-300 hover:bg-crusader-600'}`}
+                aria-label="Toggle dark mode"
+                title={darkMode ? 'Light Mode' : 'Dark Mode'}
               >
-                {darkMode ? '☀️ Light' : '🌙 Dark'}
+                {darkMode ? <Sun className="w-5 h-5" /> : <Moon className="w-5 h-5" />}
               </button>
             </div>
           </div>
         </header>
 
-        <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-4">
+        {/* Main Content */}
+        <main className="flex-1 max-w-4xl w-full mx-auto px-4 py-6">
           <ChatInterface darkMode={darkMode} />
         </main>
+
+        {/* Footer */}
+        <footer className={`${darkMode ? 'bg-gray-800 border-gray-700' : 'bg-crusader-900/80 border-gold-500/10'} border-t py-4`}>
+          <div className="max-w-4xl mx-auto px-4">
+            <p className="text-center text-sm text-gold-300/70">
+              <span className="inline-flex items-center gap-2">
+                <svg viewBox="0 0 24 24" className="w-4 h-4 text-gold-500/50" fill="currentColor">
+                  <rect x="10" y="2" width="4" height="20" rx="1" />
+                  <rect x="3" y="9" width="18" height="4" rx="1" />
+                </svg>
+                Built for His glory
+                <svg viewBox="0 0 24 24" className="w-4 h-4 text-gold-500/50" fill="currentColor">
+                  <rect x="10" y="2" width="4" height="20" rx="1" />
+                  <rect x="3" y="9" width="18" height="4" rx="1" />
+                </svg>
+              </span>
+              <span className="mx-3 text-gold-500/30">|</span>
+              God bless!
+            </p>
+          </div>
+        </footer>
       </div>
     </QueryClientProvider>
   )
