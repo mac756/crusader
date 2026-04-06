@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:ital,wght@0,400;0,700;1,400&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -18,14 +18,11 @@ html, body {
 
 #root {
   min-height: 100vh;
-  display: flex;
-  flex-direction: column;
 }
 
 /* Custom scrollbar */
 ::-webkit-scrollbar {
   width: 6px;
-  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
@@ -41,35 +38,16 @@ html, body {
   background: #9ca3af;
 }
 
-/* Scripture text styling */
-.scripture-text {
-  font-family: 'Merriweather', Georgia, serif;
-  font-style: italic;
-  line-height: 1.7;
+/* Dark mode scrollbar */
+.dark ::-webkit-scrollbar-thumb {
+  background: #4b5563;
 }
 
-/* White theme background */
-.white-bg {
-  background-color: #ffffff;
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
 }
 
-/* Thinking banner animation */
-@keyframes slideUp {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-slideUp {
-  animation: slideUp 0.3s ease-out forwards;
-}
-
-/* Typing indicator dots */
+/* Typing indicator animation */
 @keyframes pulse {
   0%, 100% { opacity: 0.4; }
   50% { opacity: 1; }
@@ -87,33 +65,29 @@ html, body {
   animation-delay: 0.4s;
 }
 
-/* Chat container height */
-.chat-container {
-  height: calc(100vh - 180px);
-  max-height: 700px;
+/* Message animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
-@media (max-width: 768px) {
-  .chat-container {
-    height: calc(100vh - 140px);
-  }
+.animate-fadeIn {
+  animation: fadeIn 0.3s ease-out forwards;
 }
 
-/* Message bubbles */
-.message-bubble {
-  max-width: 80%;
+/* Smooth transitions */
+.transition-colors {
+  transition: all 0.2s ease;
 }
 
 /* Focus styles */
 button:focus-visible,
-textarea:focus-visible,
-input:focus-visible {
-  outline: 2px solid #991b1b;
+textarea:focus-visible {
+  outline: 2px solid #dc2626;
   outline-offset: 2px;
 }
 
-/* Selection styling */
+/* Selection */
 ::selection {
-  background-color: rgba(153, 27, 27, 0.2);
-  color: inherit;
+  background-color: rgba(220, 38, 38, 0.3);
 }
